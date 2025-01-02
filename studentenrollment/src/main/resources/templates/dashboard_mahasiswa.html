@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Mahasiswa</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: white; /* Hitam */
+      color: black; /* Putih */
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .typewriter {
+      display: inline-block;
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 2px solid black;
+      animation: typing 3s steps(30, end), blink 0.5s step-end infinite;
+      font-size: 1.5rem;
+    }
+
+    @keyframes typing {
+      from { width: 0; }
+      to { width: 100%; }
+    }
+
+    @keyframes blink {
+      50% { border-color: transparent; }
+    }
+
+    .button-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .btn {
+      background-color: black; /* Putih */
+      color: white; /* Hitam */
+      border: 1px solid #ffffff;
+      padding: 15px;
+      font-size: 1rem;
+      border-radius: 5px;
+      text-transform: uppercase;
+      font-weight: bold;
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      background-color: white; /* Hitam */
+      color: black; /* Putih */
+      border: 1px solid #ffffff;
+    }
+    .logout-btn {
+    display: inline-block;
+    padding: 15px 30px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: black; /* Putih */
+    background-color: white; /* Hitam */
+    border: 2px solid black; /* Garis tepi */
+    border-radius: 5px;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    text-align: center;
+    width: fit-content;
+  }
+
+  .logout-btn:hover {
+    color: white; /* Hitam */
+    background-color: red; /* Putih */
+    border: 2px solid white;
+  }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <div class="header">
+    <div class="typewriter"><p>Selamat Datang, <span th:text="${username}">Mahasiswa</span>!</p></div>
+
+  </div>
+
+  <!-- Button Menu -->
+  <div class="button-container">
+    <button class="btn" onclick="location.href='/dashboard_mahasiswa/registrasi_matakuliah';">Registrasi Mata Kuliah</button>
+    <button class="btn" onclick="location.href='/dashboard_mahasiswa/view_transkrip';">View Transkrip</button>
+    <a href="/login.html" class="btn logout-btn">Logout</a>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Pegawai - Card View</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #ffffff;
+            color: #000000;
+        }
+        .navbar {
+            background-color: black;
+            color: white;
+        }
+
+        .modal-content{
+            background-color: white;
+            color: black;
+        }
+        .navbar-brand {
+            color: white;
+            font-weight: 500;
+        }
+        .navbar-brand:hover {
+            color: #666666;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #666666;
+            color: #ffffff;
+        }
+        .card {
+            background-color: #ffffff;
+            border: 1px solid #000000;
+            color: #000000;
+        }
+        .card:hover {
+            background-color: #f2f2f2;
+        }
+        .list-group-item {
+            background-color: #ffffff;
+            color: #000000;
+            border: 1px solid #000000;
+        }
+        .list-group-item a {
+            color: #000000;
+            text-decoration: none;
+        }
+        .list-group-item a:hover {
+            color: #666666;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/dashboard_laa">Dashboard</a>
+        <button class="btn btn-outline-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasPegawai" aria-controls="offcanvasPegawai">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasPegawai" aria-labelledby="offcanvasPegawaiLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasPegawaiLabel">Menu</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <ul class="list-group">
+            <li class="list-group-item"><a href="/dashboard_laa/mahasiswa">Manage Mahasiswa</a></li>
+            <li class="list-group-item"><a href="/dashboard_laa/laa">Manage Pegawai</a></li>
+            <li class="list-group-item"><a href="/dashboard_laa/matakuliah">Manage Mata Kuliah</a></li>
+            <li class="list-group-item"><a href="/dashboard_laa/lookup_nim">Cek Nim - MataKuliah</a></li>
+            <li class="list-group-item"><a href="/api/mahasiswa/{id}/matakuliah">Cek MataKuliah</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <h2 class="mb-4">Daftar Pegawai</h2>
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addPegawaiModal">Tambah Pegawai</button>
+    <div class="row" id="pegawaiCards">
+        <!-- Cards akan diisi melalui JavaScript -->
+    </div>
+</div>
+
+<!-- Modal Tambah/Edit Pegawai -->
+<div class="modal fade" id="addPegawaiModal" tabindex="-1" aria-labelledby="addPegawaiModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addPegawaiModalLabel">Tambah Pegawai</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="pegawaiForm">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password">
+                    </div>
+                    <div class="mb-3">
+                        <label for="nip" class="form-label">NIP</label>
+                        <input type="text" class="form-control" id="nip" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="posisi" class="form-label">Posisi</label>
+                        <input type="text" class="form-control" id="posisi" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="submitButton">Simpan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let editingPegawaiId = null;
+
+    // Fetch Pegawai Data
+    const fetchPegawai = async () => {
+        const response = await fetch('/api/laa');
+        const data = await response.json();
+        const cardContainer = document.getElementById('pegawaiCards');
+        cardContainer.innerHTML = ''; // Clear existing cards
+
+        data.forEach(pegawai => {
+            const card = `
+                <div class="col-md-4 mb-4">
+                    <div class="card p-3">
+                        <div class="card-body">
+                            <h5 class="card-title">${pegawai.username}</h5>
+                            <p class="card-text">NIP: ${pegawai.nip}</p>
+                            <p class="card-text">Posisi: ${pegawai.posisi}</p>
+                            <button class="btn btn-primary btn-sm" onclick="editPegawai(${pegawai.id})">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deletePegawai(${pegawai.id})">Hapus</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            cardContainer.innerHTML += card;
+        });
+    };
+
+    // Add/Edit Pegawai
+    document.getElementById('pegawaiForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const nip = document.getElementById('nip').value;
+        const posisi = document.getElementById('posisi').value;
+
+        if (editingPegawaiId) {
+            await fetch(`/api/laa/${editingPegawaiId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, nip, posisi, role: 'LAA' })
+            });
+        } else {
+            await fetch('/api/laa', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password, nip, posisi, role: 'LAA' })
+            });
+        }
+
+        fetchPegawai();
+        document.getElementById('pegawaiForm').reset();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addPegawaiModal'));
+        modal.hide();
+        editingPegawaiId = null;
+    });
+
+    // Edit Pegawai
+    const editPegawai = async (id) => {
+        editingPegawaiId = id;
+        const response = await fetch(`/api/laa/${id}`);
+        const pegawai = await response.json();
+
+        document.getElementById('username').value = pegawai.username;
+        document.getElementById('password').value = '';
+        document.getElementById('nip').value = pegawai.nip;
+        document.getElementById('posisi').value = pegawai.posisi;
+
+        const modal = new bootstrap.Modal(document.getElementById('addPegawaiModal'));
+        modal.show();
+    };
+
+    // Delete Pegawai
+    const deletePegawai = async (id) => {
+        if (confirm('Yakin ingin menghapus pegawai ini?')) {
+            await fetch(`/api/laa/${id}`, { method: 'DELETE' });
+            fetchPegawai();
+        }
+    };
+
+    // Load data on page load
+    fetchPegawai();
+</script>
+</body>
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>View Transkrip</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+      body {
+        background-color: #f8f9fa; /* Background warna terang */
+        color: #343a40; /* Teks gelap */
+      }
+      .navbar {
+        background-color: black;
+        color: #ffffff;
+      }
+      .navbar-brand {
+        color: white;
+        font-weight: 600;
+      }
+      .navbar-brand:hover {
+        color: #ffffff; /* Warna tetap putih saat hover */
+      }
+      .card {
+        margin-bottom: 20px;
+        border: 1px solid #dee2e6;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      }
+      .card-header {
+        background-color: #343a40;
+        color: #ffffff;
+      }
+      @media print {
+        body {
+          background-color: #ffffff !important; /* Latar belakang putih */
+          color: #000000 !important; /* Teks hitam */
+        }
+        .navbar,
+        .navbar * {
+          background-color: #ffffff !important; /* Navbar putih */
+          color: #000000 !important; /* Teks hitam */
+        }
+        .btn {
+          display: none; /* Sembunyikan tombol cetak */
+        }
+        .mb-3 {
+          margin-bottom: 1rem; /* Jarak untuk informasi mahasiswa */
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar navbar-dark">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="/dashboard_mahasiswa">Dashboard</a>
+      </div>
+    </nav>
+
+    <div class="container mt-4">
+      <h2 class="mb-4">Transkrip Mata Kuliah</h2>
+
+      <!-- Informasi Mahasiswa -->
+      <div class="mb-3">
+        <p><strong>NIM:</strong> <span id="nimMahasiswa">Loading...</span></p>
+        <p><strong>Prodi:</strong> <span id="prodiMahasiswa">Loading...</span></p>
+      </div>
+
+      <!-- Container untuk kartu mata kuliah -->
+      <div id="transkripContainer" class="row">
+        <!-- Data diisi oleh JavaScript -->
+      </div>
+      <button class="btn btn-primary mb-3" onclick="printTranskrip()">Cetak Transkrip +</button>
+    </div>
+
+    <script th:inline="javascript">
+      const userId = /*[[${mahasiswaId}]]*/ 0;
+    </script>
+    <script>
+      // Fungsi untuk mencetak konten layar
+      const printTranskrip = () => {
+        window.print();
+      };
+
+      // Fetch data mahasiswa dan transkrip
+      const fetchTranskrip = async () => {
+        const response = await fetch(`/api/mahasiswa/${userId}`);
+        const mahasiswa = await response.json();
+        document.getElementById("nimMahasiswa").textContent = mahasiswa.nim;
+        document.getElementById("prodiMahasiswa").textContent = mahasiswa.prodi;
+
+        const container = document.getElementById("transkripContainer");
+        container.innerHTML = "";
+
+        mahasiswa.mataKuliah.forEach((mataKuliah) => {
+          const card = `
+            <div class="col-md-6 col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        ${mataKuliah.nama} (${mataKuliah.kode})
+                    </div>
+                    <div class="card-body">
+                        <p><strong>SKS:</strong> ${mataKuliah.sks}</p>
+                        <p><strong>UTS:</strong> ${mataKuliah.uts}</p>
+                        <p><strong>UAS:</strong> ${mataKuliah.uas}</p>
+                        <p><strong>Kuis:</strong> ${mataKuliah.kuis}</p>
+                        <p><strong>Total:</strong> ${mataKuliah.total}</p>
+                        <p><strong>Grade:</strong> ${mataKuliah.grade}</p>
+                    </div>
+                </div>
+            </div>`;
+
+          container.innerHTML += card;
+        });
+      };
+
+      // Load transkrip on page load
+      fetchTranskrip();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CRUD Mata Kuliah</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: white;
+            color: black;
+        }
+        .navbar {
+            background-color: black;
+        }
+        .navbar-brand{
+            color: white;
+            font-weight: 600;
+        }
+        .navbar-brand:hover{
+            color: #ffffff;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .card {
+            background-color: white;
+            color: black;
+        }
+        .card:hover {
+            background-color: #ecebeb;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/dashboard_laa">Dashboard</a>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h2 class="mb-4">Daftar Mata Kuliah</h2>
+    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#addMataKuliahModal">Tambah Mata Kuliah</button>
+    <div class="row" id="mataKuliahList">
+        <!-- Cards will be dynamically inserted here -->
+    </div>
+</div>
+
+<!-- Modal Tambah/Edit Mata Kuliah -->
+<div class="modal fade" id="addMataKuliahModal" tabindex="-1" aria-labelledby="addMataKuliahModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addMataKuliahModalLabel">Tambah Mata Kuliah</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="mataKuliahForm">
+                    <div class="mb-3">
+                        <label for="nama" class="form-label">Nama Mata Kuliah</label>
+                        <input type="text" class="form-control" id="nama" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="kode" class="form-label">Kode Mata Kuliah</label>
+                        <input type="text" class="form-control" id="kode" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="sks" class="form-label">SKS</label>
+                        <input type="number" class="form-control" id="sks" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="submitButton">Simpan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let editingMataKuliahId = null; // ID Mata Kuliah yang sedang diedit
+
+    // Fetch Mata Kuliah Data
+    const fetchMataKuliah = async () => {
+        const response = await fetch('/api/matakuliah');
+        const data = await response.json();
+        const listContainer = document.getElementById('mataKuliahList');
+        listContainer.innerHTML = ''; // Clear existing cards
+        data.forEach(matkul => {
+            const card = `
+                <div class="col-md-4 mb-3">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">ID Mata Kuliah : ${matkul.id}</h5>
+                            <h5 class="card-title">${matkul.nama}</h5>
+                            <h6 class="card-subtitle mb-2 text-muted">Kode: ${matkul.kode}</h6>
+                            <p class="card-text">SKS: ${matkul.sks}</p>
+                            <button class="btn btn-primary btn-sm" onclick="editMataKuliah(${matkul.id})">Edit</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteMataKuliah(${matkul.id})">Hapus</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            listContainer.innerHTML += card;
+        });
+    };
+
+    // Add/Edit Mata Kuliah
+    document.getElementById('mataKuliahForm').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const nama = document.getElementById('nama').value;
+        const kode = document.getElementById('kode').value;
+        const sks = document.getElementById('sks').value;
+
+        if (editingMataKuliahId) {
+            // Update existing Mata Kuliah
+            await fetch(`/api/matakuliah/${editingMataKuliahId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nama, kode, sks })
+            });
+        } else {
+            // Add new Mata Kuliah
+            await fetch('/api/matakuliah', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nama, kode, sks })
+            });
+        }
+
+        fetchMataKuliah();
+        document.getElementById('mataKuliahForm').reset();
+        const modal = bootstrap.Modal.getInstance(document.getElementById('addMataKuliahModal'));
+        modal.hide();
+        editingMataKuliahId = null; // Reset editing ID
+        document.getElementById('addMataKuliahModalLabel').innerText = 'Tambah Mata Kuliah';
+        document.getElementById('submitButton').innerText = 'Simpan';
+    });
+
+    // Edit Mata Kuliah
+    const editMataKuliah = async (id) => {
+        editingMataKuliahId = id;
+        const response = await fetch(`/api/matakuliah/${id}`);
+        const matkul = await response.json();
+
+        // Fill form with existing data
+        document.getElementById('nama').value = matkul.nama;
+        document.getElementById('kode').value = matkul.kode;
+        document.getElementById('sks').value = matkul.sks;
+
+        document.getElementById('addMataKuliahModalLabel').innerText = 'Edit Mata Kuliah';
+        document.getElementById('submitButton').innerText = 'Update';
+
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('addMataKuliahModal'));
+        modal.show();
+    };
+
+    // Delete Mata Kuliah
+    const deleteMataKuliah = async (id) => {
+        if (confirm('Yakin ingin menghapus mata kuliah ini?')) {
+            await fetch(`/api/matakuliah/${id}`, { method: 'DELETE' });
+            fetchMataKuliah();
+        }
+    };
+
+    // Load data on page load
+    fetchMataKuliah();
+</script>
+</body>
+</html>

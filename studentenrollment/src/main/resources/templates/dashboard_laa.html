@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ivamos Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+      body {
+        background-color: #f8f9fa;
+        font-family: "Arial", sans-serif;
+        margin: 0;
+        padding: 0;
+      }
+
+      .navbar {
+        background-color: black;
+        color: #f8f9fa;
+        padding: 10px;
+      }
+
+      .navbar-brand {
+        color: #f8f9fa;
+        font-weight: bold;
+      }
+
+      .navbar-brand:hover {
+        color: #adb5bd;
+      }
+
+      .logout-btn {
+        background-color: #dc3545;
+        color: #fff;
+        border: none;
+        padding: 8px 15px;
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: background-color 0.3s ease;
+      }
+
+      .logout-btn:hover {
+        background-color: #c82333;
+      }
+
+      .content {
+        padding-top: 300px;
+        background-color: #ffffff;
+        color: black;
+        text-align: center;
+        min-height: 100vh;
+      }
+
+      .typing-text {
+        font-size: 2rem;
+        font-weight: bold;
+        color: black;
+        margin-bottom: 20px;
+      }
+
+      .buttons-container {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 15px;
+        margin-top: 30px;
+      }
+
+      .nav-btn {
+        background-color: black;
+        color: #fff;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 5px;
+        font-size: 1rem;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+      }
+
+      .nav-btn:hover {
+        background-color: #343a40;
+        transform: scale(1.05);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">IVamos</a>
+        <button class="logout-btn ms-auto" onclick="location.href='/logout';">Logout</button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="content">
+      <div class="container">
+        <div class="typing-text" id="typingText">Hello, Admin!</div>
+        <h2>Welcome to the Dashboard LAA</h2>
+        <p>Please choose an action below to get started:</p>
+
+        <div class="buttons-container">
+          <button class="nav-btn" onclick="location.href='/dashboard_laa/mahasiswa';">Manage Mahasiswa</button>
+          <button class="nav-btn" onclick="location.href='/dashboard_laa/laa';">Manage Pegawai</button>
+          <button class="nav-btn" onclick="location.href='/dashboard_laa/matakuliah';">Manage Mata Kuliah</button>
+          <button class="nav-btn" onclick="location.href='/dashboard_laa/search_id';">Cek ID - Mata Kuliah</button>
+          <button class="nav-btn" onclick="location.href='/dashboard_laa/search_nim';">Cek NIM - Mata Kuliah</button>
+          <button class="nav-btn" onclick="location.href='/dashboard_laa/search_matkul';">Cek Mata Kuliah</button>
+          <button class="nav-btn" onclick="location.href='/dashboard_laa/update-nilai-page';">Update Nilai Mahasiswa</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Typing Effect Script -->
+    <script>
+      const textElement = document.getElementById("typingText");
+      const text = "Hello, Admin! 👋";
+      let index = 0;
+
+      function typeText() {
+        if (index < text.length) {
+          textElement.textContent += text.charAt(index);
+          index++;
+          setTimeout(typeText, 100);
+        }
+      }
+
+      // Start typing effect
+      textElement.textContent = "";
+      typeText();
+    </script>
+  </body>
+</html>

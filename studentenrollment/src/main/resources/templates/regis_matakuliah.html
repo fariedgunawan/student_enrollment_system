@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrasi Mata Kuliah</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa; /* Warna latar belakang terang */
+            color: black; /* Warna teks gelap */
+        }
+        .navbar {
+            background-color: black;
+            color: #ffffff;
+        }
+        .navbar-brand {
+            color: white;
+            font-weight: 600;
+        }
+        .navbar-brand:hover {
+            color: #ffffff;
+        }
+        .list-group-item {
+            background-color: white;
+            border: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .list-group-item:hover {
+            transform: scale(1.02);
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .btn {
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        #message {
+            transition: opacity 0.3s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/dashboard_mahasiswa">Dashboard</a>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <h1 class="mb-4 text-center">Registrasi Mata Kuliah</h1>
+    <div id="message" class="alert d-none" role="alert"></div>
+    <ul class="list-group" id="mataKuliahContainer">
+        <!-- Daftar mata kuliah akan dimuat melalui JavaScript -->
+    </ul>
+</div>
+
+<script th:inline="javascript">
+    const mahasiswaId = /*[[${mahasiswaId}]]*/ 0;
+</script>
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Fetch Mata Kuliah dan Status Relasi
+    const fetchMataKuliah = async () => {
+        try {
+            const mataKuliahResponse = await fetch('/api/matakuliah');
+            const mahasiswaResponse = await fetch(`/api/mahasiswa/${mahasiswaId}`);
+            if (mataKuliahResponse.ok && mahasiswaResponse.ok) {
+                const mataKuliahList = await mataKuliahResponse.json();
+                const mahasiswa = await mahasiswaResponse.json();
+                const mataKuliahDiambil = mahasiswa.mataKuliah.map(mk => mk.id);
+
+                const container = document.getElementById('mataKuliahContainer');
+                container.innerHTML = ''; // Bersihkan konten lama
+
+                mataKuliahList.forEach(mataKuliah => {
+                    const isTaken = mataKuliahDiambil.includes(mataKuliah.id);
+                    const listItem = `
+                        <li class="list-group-item">
+                            <div>
+                                <h5>${mataKuliah.nama}</h5>
+                                <p>Kode: ${mataKuliah.kode} | SKS: ${mataKuliah.sks}</p>
+                            </div>
+                            <button
+                                class="btn ${isTaken ? 'btn-danger' : 'btn-primary'} relasi-button"
+                                data-matakuliah-id="${mataKuliah.id}">
+                                ${isTaken ? 'Remove' : 'Add'}
+                            </button>
+                        </li>
+                    `;
+                    container.innerHTML += listItem;
+                });
+
+                // Tambahkan event listener ke tombol relasi
+                document.querySelectorAll('.relasi-button').forEach(button => {
+                    button.addEventListener('click', () => {
+                        const mataKuliahId = button.dataset.matakuliahId;
+                        if (button.classList.contains('btn-primary')) {
+                            assignMataKuliah(mahasiswaId, mataKuliahId, button);
+                        } else {
+                            deleteMataKuliah(mahasiswaId, mataKuliahId, button);
+                        }
+                    });
+                });
+            } else {
+                alert('Gagal memuat data mata kuliah atau mahasiswa.');
+            }
+        } catch (error) {
+            console.error('Kesalahan saat memuat data:', error);
+            alert('Terjadi kesalahan. Silakan coba lagi.');
+        }
+    };
+
+    // Fungsi untuk menampilkan pesan
+    const showMessage = (message, type) => {
+        const messageDiv = document.getElementById('message');
+        messageDiv.textContent = message;
+        messageDiv.className = `alert alert-${type} mt-3`;
+        messageDiv.classList.remove('d-none');
+        setTimeout(() => {
+            messageDiv.classList.add('d-none');
+        }, 3000);
+    };
+
+    // Assign Mata Kuliah
+    const assignMataKuliah = async (mahasiswaId, mataKuliahId, buttonElement) => {
+        try {
+            const response = await fetch(`/api/matakuliahmahasiswa/assign?mahasiswaId=${mahasiswaId}&mataKuliahId=${mataKuliahId}`, {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                showMessage('Berhasil menambahkan mata kuliah.', 'success');
+                buttonElement.innerText = 'Remove';
+                buttonElement.classList.remove('btn-primary');
+                buttonElement.classList.add('btn-danger');
+            } else {
+                showMessage('Gagal menambahkan mata kuliah. Silakan coba lagi.', 'danger');
+            }
+        } catch (error) {
+            console.error('Kesalahan saat menambahkan mata kuliah:', error);
+            showMessage('Terjadi kesalahan. Silakan coba lagi.', 'danger');
+        }
+    };
+
+    // Delete Mata Kuliah
+    const deleteMataKuliah = async (mahasiswaId, mataKuliahId, buttonElement) => {
+        try {
+            const response = await fetch(`/api/matakuliahmahasiswa/delete?mahasiswaId=${mahasiswaId}&mataKuliahId=${mataKuliahId}`, {
+                method: 'DELETE'
+            });
+
+            if (response.ok) {
+                showMessage('Berhasil menghapus mata kuliah.', 'success');
+                buttonElement.innerText = 'Add';
+                buttonElement.classList.remove('btn-danger');
+                buttonElement.classList.add('btn-primary');
+            } else {
+                showMessage('Gagal menghapus mata kuliah. Silakan coba lagi.', 'danger');
+            }
+        } catch (error) {
+            console.error('Kesalahan saat menghapus mata kuliah:', error);
+            showMessage('Terjadi kesalahan. Silakan coba lagi.', 'danger');
+        }
+    };
+
+    // Load Mata Kuliah saat halaman dimuat
+    fetchMataKuliah();
+</script>
+</body>
+</html>
